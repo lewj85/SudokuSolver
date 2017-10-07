@@ -3,7 +3,7 @@
 # <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="659821374843975216271463985482519637937642158516387492365298741728134569194756823">
 # <INPUT ID="editmask" TYPE=hidden VALUE="111111110111000011011110001011101010111101111010101110100011110110000111011111111">
 
-def printPuzzle(valueList, solvedList):
+def printPuzzle(valueList, solvedList='0'*81):
     for i in range(9):
         lineVals = []
         for j in range(9):
@@ -22,6 +22,8 @@ def parseHTML(htmlStuff):
 
 def solvePuzzle(valueList, solvedList):
 
+    print(valueList)
+    print(solvedList)
     # create a list of values 1-9 for each location on the grid
     sudokuList = []
 
@@ -43,55 +45,86 @@ def solvePuzzle(valueList, solvedList):
                 sudokuList[i][1].append(j)
         else:
             sudokuList.append([valueList[i], []])
-    #print(sudokuList)
 
     m = 0
     # while we still haven't solved the puzzle, keep looping
     while 1 in solvedList:
 
         # go through each location
-        for i in range(18):  # TODO range(81). using 18 for debugging
-
-            #print('index '+str(i))
+        for i in range(81):
 
             # if there's only 1 possibility left for that location, solve it
             if len(sudokuList[i][1]) == 1:
                 solvedList[i] = 0
+                #print(sudokuList[i])
                 sudokuList[i][0] = sudokuList[i][1][0]
                 sudokuList[i][1].pop(0)
+                #print(sudokuList[i])
+                #print('found index '+str(i)+': '+str(sudokuList[i][0]))
 
-            # expand first solved value
+            # expand each solved value
             if not solvedList[i]:
-                #print('examining value '+str(i))
-                # first check row to eliminate possibilities
+
+                # check rows to eliminate possibilities
                 for r in range(9):
-                    indexA = int(i/9)*9 + r  # this goes through each column of the current row
+                    # go through each column of the current row
+                    indexA = int(i/9)*9 + r
                     # pop that value from the list
                     if sudokuList[i][0] in sudokuList[indexA][1]:
-                        print(str(sudokuList[i][0]) + ' is in ' + str(sudokuList[indexA][1])+'... popping it')
+                        #print(str(sudokuList[i][0]) + ' is in ' + str(sudokuList[indexA][1])+'... popping it')
                         sudokuList[indexA][1].pop(sudokuList[indexA][1].index(sudokuList[i][0]))
-                    else:
-                        print(str(sudokuList[i][0])+' is NOT in '+str(sudokuList[indexA][1]))
-                        pass
+                    # else:
+                    #     print(str(sudokuList[i][0])+' is NOT in '+str(sudokuList[indexA][1]))
 
 
-                # then check columns to eliminate possibilities
-                for c in range(0, 81, 9):
-                    pass
+                # check columns to eliminate possibilities
+                for s in range(9):
+                    # go through each row of the current column
+                    indexB = (i%9) + (9*s)
+                    # pop that value from the list
+                    if sudokuList[i][0] in sudokuList[indexB][1]:
+                        # print(str(sudokuList[i][0]) + ' is in ' + str(sudokuList[indexB][1])+'... popping it')
+                        sudokuList[indexB][1].pop(sudokuList[indexB][1].index(sudokuList[i][0]))
+                        # else:
+                        #     print(str(sudokuList[i][0])+' is NOT in '+str(sudokuList[indexB][1]))
 
 
-                # then check 3x3 sections to eliminate possibilities
-
+                # check 3x3 sections to eliminate possibilities
+                for u in range(3):
+                    for v in range(3):
+                        # go through each column of the current row
+                        indexC = ((int(i/3)*3 + u)%9) + (9*v) + (int(i/27)*27)
+                        if sudokuList[i][0] in sudokuList[indexC][1]:
+                            # print(str(sudokuList[i][0]) + ' is in ' + str(sudokuList[indexB][1])+'... popping it')
+                            sudokuList[indexC][1].pop(sudokuList[indexC][1].index(sudokuList[i][0]))
+                            # else:
+                            #     print(str(sudokuList[i][0])+' is NOT in '+str(sudokuList[indexB][1]))
 
         # TODO remove m, used for debugging
         m += 1
-        if m > 1:
+        if m > 20:
             break
-    print(sudokuList)
 
-    finalList = []
+    finalList = ''
+    newList = ''
     for i in range(81):
-        finalList.append(str(sudokuList[i][0]))
+        finalList+=str(sudokuList[i][0])
+        newList+=str(solvedList[i])
+
+    print(finalList)
+    print(newList)
+
+
+    # 2nd while loop uses a pathing algorithm to look at possibilities
+    # NOTE: it uses a priority queue to expand the most likely nodes first
+    # NOTE: it marks guessed nodes as '2' in solvedList
+    while 1 in solvedList or 2 in solvedList:
+
+        # magic
+
+        break
+
+
 
     return finalList
 
@@ -119,7 +152,7 @@ def main():
     result = solvePuzzle(values, solved)
 
     # print the solved puzzle
-    printPuzzle(result, solved)
+    printPuzzle(result)
 
     # double check all values are correct
     print(checkPuzzle(result, values))
