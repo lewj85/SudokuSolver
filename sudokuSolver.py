@@ -3,24 +3,78 @@
 # <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="659821374843975216271463985482519637937642158516387492365298741728134569194756823">
 # <INPUT ID="editmask" TYPE=hidden VALUE="111111110111000011011110001011101010111101111010101110100011110110000111011111111">
 
-def printPuzzle(valueList, solvedList='0'*81):
-    for i in range(9):
-        lineVals = []
-        for j in range(9):
-            index = (i * 9) + j
-            if not int(solvedList[index]):
-                lineVals.append(int(valueList[index]))
-            else:
-                lineVals.append(0)
-        print(lineVals)
+
+##################################################
+# CLASSES
+##################################################
+class PQ:
+    def __init__(self):
+        self.list = []
+        self.top = -1
+
+    # NOTE: push automatically sorts the value by length of its in index 1
+    def push(self, value):
+        i = 0
+        atEnd = True
+        if self.top != -1:
+            for i in range(self.length()):
+                # find the index i where the value should be inserted
+                if len(value[1]) < len(self.list[i][1]):
+                    atEnd = False
+                    break
+        # make sure you're not
+        if atEnd:
+            self.list.append(value)
+        else:
+            self.list.insert(i, value)
+        # don't forget to increment top
+        self.top += 1
+
+    def pop(self, index=0):
+        if self.top > -1:
+            self.top -= 1
+            return self.list.pop(index)
+
+    def peek(self, index=0):
+        return self.list[index]
+
+    def length(self):
+        return self.top + 1
+
+    def show(self):
+        for i in range(self.length()):
+            print(self.list[i])
 
 
+##################################################
+# FUNCTIONS
+##################################################
 def parseHTML(htmlStuff):
     # regex is fun
     pass
 
 
+def printPuzzle(valueList, solvedList='0'*81):
+    for i in range(9):
+        if i in [3, 6]:
+            print('-'*22)
+        lineVals = ''
+        for j in range(9):
+            if j in [3, 6]:
+                lineVals += '| '
+            index = (i * 9) + j
+            if not int(solvedList[index]):
+                lineVals += valueList[index]+' '
+            else:
+                lineVals += '0 '
+        print(lineVals)
+
+
 def solvePuzzle(valueList, solvedList):
+
+    ####################################################
+    # PART 1 - no guessing
+    ####################################################
 
     print(valueList)
     print(solvedList)
@@ -115,15 +169,32 @@ def solvePuzzle(valueList, solvedList):
     print(newList)
 
 
+    ####################################################
+    # PART 2 - guessing (aka "Magic")
+    ####################################################
+
+    # add items to priority queue
+    pq = PQ()
+    for i in range(81):
+        pq.push(sudokuList[i])
+    #pq.show()
+
     # 2nd while loop uses a pathing algorithm to look at possibilities
     # NOTE: it uses a priority queue to expand the most likely nodes first
     # NOTE: it marks guessed nodes as '2' in solvedList
     while 1 in solvedList or 2 in solvedList:
 
-        # magic
+        # remove all values from priority queue that have a length of 0 (ie. they are solved)
+        for i in range(pq.length()):
+            if len(pq.peek(0)[1]) == 0:  # NOTE: always peek(0), not peek(i) because we are popping
+                pq.pop()
+            else:
+                break  # stop early to save processing time
+        #pq.show()
+
+        # TODO: magic
 
         break
-
 
 
     return finalList
@@ -142,11 +213,11 @@ def main():
     values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
     solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"
 
-    # first print the puzzle unsolved
-    printPuzzle(values, solved)
-
     # regex
     parseHTML('blah')
+
+    # first print the puzzle unsolved
+    printPuzzle(values, solved)
 
     # solve the puzzle
     result = solvePuzzle(values, solved)
