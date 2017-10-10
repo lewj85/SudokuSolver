@@ -127,6 +127,7 @@ def solvePuzzle(valueList, solvedList):
 
             # if there's only 1 possibility left for that location, solve it
             if len(sudokuList[i][1]) == 1:
+                print('solving index ' + str(i) + ' - only 1 possibility left')
                 solvedList[i] = 0
                 #print(sudokuList[i])
                 sudokuList[i][0] = sudokuList[i][1][0]
@@ -180,12 +181,7 @@ def solvePuzzle(valueList, solvedList):
                             #     print(str(sudokuList[i][0])+' is NOT in '+str(sudokuList[indexB][1]))
 
 
-        # TODO remove m, used for debugging. instead just compare previous state to current state. if same then break
-        m += 1
-        if m > 25:
-            break
-
-    while 1 in solvedList:
+        # try some more eliminations
         for i in range(81):
 
             # if solvedList[i] is a known value (is 0), we can expand it
@@ -247,16 +243,17 @@ def solvePuzzle(valueList, solvedList):
                         # print(counter)
                         # if the total count is 5, we can solve the 6th
                         if counter == 5:
-                            print('theSix for ' + str(i) + ' are ' + str(theSix))
+                            #print('theSix for ' + str(i) + ' are ' + str(theSix))
                             for x in theSix:
                                 # find the index that's unsolved and make sure the value doesn't already exist in the block
                                 if solvedList[x]:
-                                    print(str(x)+' needs to be solved')
+                                    #print(str(x)+' needs to be solved')
                                     if sudokuList[i][0] not in blockVals:
                                         # replace the unknown with sudokuList[i] and update solvedList
-                                        print('solving index ' + str(x))
+                                        print('solving index ' + str(x) + ' - 5 out of 6 knowns in adjacent row blocks')
                                         sudokuList[x] = [sudokuList[i], []]
                                         solvedList[x] = 0
+
 
                 #######################################################
                 # check to see if 5 out of 6 values in adjacent block rows are solved
@@ -272,37 +269,50 @@ def solvePuzzle(valueList, solvedList):
 
                 # store the solved numbers in the current block
                 blockVals = []
-                for m in block:
-                    blockVals.append(sudokuList[m])
+                for aa in block:
+                    blockVals.append(sudokuList[aa])
                 #print(blockVals)
 
                 # isolate the column i is on
                 col = i % 3
 
-                # # check each adjacent block in the row
-                # for k in rowBlocks:
-                #     counter = 0
-                #     theSix = []
-                #     # check each value in that block
-                #     for j in allBlocks[k]:
-                #         # if not on the same row, add up solved values
-                #         if int(j/9)*9 % 27 != row:
-                #             theSix.append(j)
-                #             if not solvedList[j]:
-                #                 counter += 1
-                #         # if the total count is 5, we can solve the 6th
-                #         if counter == 5:
-                #             #print('theSix for '+str(i)+' are '+str(theSix))
-                #             for x in theSix:
-                #                 # find the index that's unsolved and make sure the value doesn't already exist in the block
-                #                 if solvedList[x] and sudokuList[i] not in blockVals:
-                #                     # replace the unknown with sudokuList[i] and update solvedList
-                #                     print('solving index '+str(x))
-                #                     sudokuList[x] = sudokuList[i]
-                #                     solvedList[x] = 0
+                # check each adjacent block in the row
+                for bb in colBlocks:
+                    counter = 0
+                    theSix = []
+                    # store the solved numbers in the current block
+                    blockVals = []
+                    for dd in block:
+                        blockVals.append(sudokuList[dd][0])
+                    # print(blockVals)
+
+                    # check each value in that block
+                    for cc in allBlocks[bb]:
+                        # if not on the same row, add up solved values
+                        # print('is row '+str(int((int(cc/9)*9 % 27)/9))+' != '+str(row))
+                        if cc % 3 != row:
+                            # print('appending '+str(cc)+' to theSix')
+                            theSix.append(cc)
+                            # print(theSix)
+                            # if solvedList[cc] is solved (has a 0)
+                            if not solvedList[cc]:
+                                counter += 1
+                        # print(counter)
+                        # if the total count is 5, we can solve the 6th
+                        if counter == 5:
+                            #print('theSix for ' + str(i) + ' are ' + str(theSix))
+                            for x in theSix:
+                                # find the index that's unsolved and make sure the value doesn't already exist in the block
+                                if solvedList[x]:
+                                    #print(str(x)+' needs to be solved')
+                                    if sudokuList[i][0] not in blockVals:
+                                        # replace the unknown with sudokuList[i] and update solvedList
+                                        print('solving index ' + str(x) + ' - 5 out of 6 knowns in adjacent column blocks')
+                                        sudokuList[x] = [sudokuList[i], []]
+                                        solvedList[x] = 0
 
 
-
+                # TODO: FIX THIS SECTION
                 #######################################################
                 # check rows of 3x3 sections to remove possibilities
                 #######################################################
@@ -313,10 +323,89 @@ def solvePuzzle(valueList, solvedList):
                 1 0 0 | 0 5 0 | 0 0 0
                 the top left 6 and the middle 1 3 4 means we can eliminate 6 from the bottom right 3 nodes
                 """
+                """
+                # NOTE: block, rowBlocks, blockNum, row, and col are known from above
+                # check each adjacent block in the row
+                for bb in rowBlocks:
+                    theThree = [[], [], []]
 
+                    # check each value in that block
+                    for cc in allBlocks[bb]:
+                        # if not on the same row, add to the appropriate list
+                        ee = int((cc % 27) / 9)
+                        if ee != row:
+                            theThree[ee].append(cc)
+                            # print(theThree)
+
+                    for ff in range(len(theThree)):
+                        counter = 0
+                        if theThree[ff]:
+                            for gg in theThree[ff]:
+                                # if solvedList[cc] is solved (has a 0)
+                                if not solvedList[gg]:
+                                    counter += 1
+                        # print(counter)
+                        # if the total count is 3, we can eliminate index i from last row of last rowBlock
+                        if counter == 3:
+                            temp = rowBlocks
+                            temp.remove(bb)
+                            lastBlock = temp.pop(0)
+                            temp = [0, 1, 2]
+                            temp.remove(row)
+                            temp.remove(int((gg % 27) / 9))
+                            lastRow = temp.pop(0)
+                            startIndex = allBlocks[lastBlock][lastRow*3]  # TODO double-check this logic
+                            for hh in range(3):
+                                try:
+                                    sudokuList[startIndex+hh][1].remove(sudokuList[i][0])
+                                    print('removed ' + str(i) + ' from ' + str([startIndex, startIndex + 1, startIndex + 2]))
+                                except:
+                                    print('failed to remove ' + str(i) + ' from ' + str([startIndex, startIndex + 1, startIndex + 2]))
+                """
+
+                # TODO: FIX THIS SECTION
                 #######################################################
                 # check column of 3x3 sections to remove possibilities
                 #######################################################
+                """
+                for ii in colBlocks:
+                    theThree = [[], [], []]
+
+                    # check each value in that block
+                    for jj in allBlocks[ii]:
+                        # if not on the same row, add to the appropriate list
+                        kk = jj % 3
+                        if kk != row:
+                            theThree[kk].append(jj)
+                            # print(theThree)
+
+                    for mm in range(len(theThree)):
+                        counter = 0
+                        if theThree[mm]:
+                            for nn in theThree[mm]:
+                                # if solvedList[jj] is solved (has a 0)
+                                if not solvedList[nn]:
+                                    counter += 1
+                                # print(counter)
+                                # if the total count is 3, we can eliminate index i from last row of last colBlock
+                        if counter == 3:
+                            temp = colBlocks
+                            temp.remove(ii)
+                            lastBlock = temp.pop(0)
+                            temp = [0, 1, 2]
+                            temp.remove(col)
+                            print(col)
+                            print(nn % 3)
+                            temp.remove(nn % 3)
+                            lastCol = temp.pop(0)
+                            startIndex = allBlocks[lastBlock][lastCol]
+                            for pp in [0, 9, 18]:
+                                try:
+                                    sudokuList[startIndex+pp][1].remove(sudokuList[i][0])
+                                    print('removed ' + str(i) + ' from ' + str([startIndex, startIndex + 9, startIndex + 18]))
+                                except:
+                                    print('failed to remove ' + str(i) + ' from ' + str([startIndex, startIndex + 9, startIndex + 18]))
+                """
 
 
                 #######################################################
@@ -380,6 +469,11 @@ def solvePuzzle(valueList, solvedList):
     print(finalList)
     print(newList)
 
+    solvedList2 = ''
+    for abc in range(81):
+        solvedList2 += str(len(sudokuList[abc][1]))
+    print(solvedList2)
+
     return finalList
 
 
@@ -387,7 +481,8 @@ def checkPuzzle(puzzle1, puzzle2):
     counter = 0
     for i in range(81):
         counter += (puzzle1[i]==puzzle2[i])
-    return (counter == 81)
+    #return (counter == 81)
+    return counter
 
 
 def main():
@@ -395,6 +490,7 @@ def main():
     # TODO remove these samples, used for debugging
     values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
     solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"
+    # change this   ^   to a 0 and the whole puzzle can already be solved!
 
     # regex
     parseHTML('blah')
