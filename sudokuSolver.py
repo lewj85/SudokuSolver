@@ -532,14 +532,15 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                     diffRow = int((threeIndex % 27) / 9)
                     if diffRow != row:
                         theThree[diffRow].append(threeIndex)
-                print('i is ' + str(i) + ' : theThree is ' + str(theThree))
+                #print('i is ' + str(i) + ' : theThree is ' + str(theThree))
 
                 for eachThree in range(len(theThree)):
                     counter = 0
                     if theThree[eachThree]:  # because one will be an empty list
                         for threeIndex in theThree[eachThree]:
                             # if solvedList[threeIndex] is solved (has a 0)
-                            if not solvedList[threeIndex]:
+                            # bugfix: make sure sudokuList[i][0] isn't in theThree indices
+                            if not solvedList[threeIndex] and sudokuList[i][0] != sudokuList[threeIndex][0]:
                                 counter += 1
                     # print(counter)
                     # if the total count is 3, we can eliminate index i from last row of last rowBlock
@@ -553,17 +554,21 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                         temp.remove(row)
                         temp.remove(int((threeIndex % 27) / 9))
                         lastRow = temp.pop(0)
-                        #print('lastRow is '+str(lastRow))
-                        print('allBlocks[lastBlock] is '+str(allBlocks[lastBlock]))
-                        startIndex = allBlocks[lastBlock][lastRow]  # will yield indices [0,1,2] because the lastBlock order isn't [0,3,6]
-                        print('i is ' + str(i) + ' : start index is ' + str(startIndex))
-                        for k in [0,3,6]:
+                        startIndex = allBlocks[lastBlock][lastRow]  # takes index 0,1, or 2 because the lastBlock row order is [0,1,2...]
+                        # print('i is ' + str(i) + ' with value '+str(sudokuList[i]))
+                        # print('theThree is ' + str(theThree))
+                        # print('threeIndex is '+str(threeIndex))
+                        # print('lastRow is '+str(lastRow))
+                        # print('allBlocks[lastBlock] is '+str(allBlocks[lastBlock]))
+                        # print('startIndex is ' + str(startIndex))
+                        for k in [0,1,2]:
+                            #print('sudokuList[startIndex+k] is ' + str(sudokuList[startIndex + k]))
                             try:
-                                #print('removing '+str(startIndex+k))
                                 sudokuList[startIndex+k][1].remove(sudokuList[i][0])
-                                print('removed possibility of ' + str(sudokuList[i][0]) + ' from indices ' + str([startIndex, startIndex + 1, startIndex + 2]))
+                                #print('removed possibility of ' + str(sudokuList[i][0]) + ' from index ' + str(startIndex+k))
                             except:
-                                print('failed to remove possibility of ' + str(sudokuList[i][0]) + ' from indices ' + str([startIndex, startIndex + 1, startIndex + 2]))
+                                #print('failed to remove possibility of ' + str(sudokuList[i][0]) + ' from index ' + str(startIndex+k))
+                                pass
 
 
             #######################################################
@@ -576,26 +581,26 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
             colBlocks.pop(location)
             #print('other blocks in col are '+str(colBlocks))
 
-            # isolate the column i is on
+            # isolate the column i is on: 0, 1, or 2
             col = i % 3
             #print(str(i)+' is in column '+str(col))
             for block in colBlocks:
                 theThree = [[], [], []]
 
                 # check each value in that block
-                for jj in allBlocks[block]:
+                for threeIndex in allBlocks[block]:
                     # if not on the same row, add to the appropriate list
-                    kk = jj % 3
-                    if kk != col:
-                        theThree[kk].append(jj)
+                    diffCol = threeIndex % 3
+                    if diffCol != col:
+                        theThree[diffCol].append(threeIndex)
                         # print(theThree)
 
-                for threeIndex in range(len(theThree)):
+                for eachThree in range(len(theThree)):
                     counter = 0
-                    if theThree[threeIndex]:  # because one index will be an empty list
-                        for nn in theThree[threeIndex]:
+                    if theThree[eachThree]:  # because one index will be an empty list
+                        for threeIndex in theThree[eachThree]:
                             # if solvedList[jj] is solved (has a 0)
-                            if not solvedList[nn]:
+                            if not solvedList[threeIndex] and sudokuList[i][0] != sudokuList[threeIndex][0]:
                                 counter += 1
                             # print(counter)
                             # if the total count is 3, we can eliminate index i from last row of last colBlock
@@ -605,15 +610,17 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                         lastBlock = temp.pop(0)
                         temp = [0, 1, 2]
                         temp.remove(col)
-                        temp.remove(nn % 3)
+                        temp.remove(threeIndex % 3)
                         lastCol = temp.pop(0)
-                        startIndex = allBlocks[lastBlock][lastCol]
-                        for k in [0, 1, 2]:
+                        startIndex = allBlocks[lastBlock][lastCol*3]  # we want to take 0, 1, or 2 and get index 0, 3, or 6, so multiply by 3
+                        for k in [0, 9, 18]:  # add 0, 9, and 18 to get column indices from the starting index
+                            #print('sudokuList[startIndex+k] is ' + str(sudokuList[startIndex+k]))
                             try:
                                 sudokuList[startIndex+k][1].remove(sudokuList[i][0])
-                                print('removed possibility of ' + str(sudokuList[i][0]) + ' from indices ' + str([startIndex, startIndex + 9, startIndex + 18]))
+                                #print('removed possibility of ' + str(sudokuList[i][0]) + ' from indices ' + str([startIndex, startIndex + 9, startIndex + 18]))
                             except:
-                                print('failed to remove possibility of ' + str(sudokuList[i][0]) + ' from indices ' + str([startIndex, startIndex + 9, startIndex + 18]))
+                                #print('failed to remove possibility of ' + str(sudokuList[i][0]) + ' from indices ' + str([startIndex, startIndex + 9, startIndex + 18]))
+                                pass
 
 
 def removePossibilities4(sudokuList, solvedList, allBlocks):
@@ -684,8 +691,7 @@ def main():
 
     # TODO remove these samples, used for debugging
     values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
-    #solved = "111010111111000111011111111111111111111111111111111111111111111111111111111111111"
-    solved = "111111010111000011011110001011101010111101111010101110100011110110000111011111111"
+    solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"
 
     # regex
     parseHTML('blah')
@@ -700,7 +706,7 @@ def main():
     printPuzzle(result)
 
     # double check all values are correct
-    print(checkPuzzle(result, values))
+    print('Values solved: ' + str(checkPuzzle(result, values)) + '/81.')
 
 
 if __name__ == "__main__":
