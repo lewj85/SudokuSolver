@@ -17,8 +17,6 @@ for reference:
 54 55 56 | 57 58 59 | 60 61 62
 63 64 65 | 66 67 68 | 69 70 71
 72 73 74 | 75 76 77 | 78 79 80
-
-
 """
 
 ##################################################
@@ -146,10 +144,6 @@ def solvePuzzle(valueList, solvedList):
         solveLocation1(sudokuList, solvedList)
         removePossibilities3(sudokuList, solvedList, allBlocks)
         solveLocation2(sudokuList, solvedList)
-        solveLocation1(sudokuList, solvedList)
-        removePossibilities4(sudokuList, solvedList, allBlocks)
-        solveLocation2(sudokuList, solvedList)
-        solveLocation1(sudokuList, solvedList)
 
     ####################################################
     # PART 2 - guessing (aka "Magic")
@@ -191,14 +185,24 @@ def solveLocation1(sudokuList, solvedList):
 
 
 def solveLocation2(sudokuList, solvedList):
-    # if one of the possibilities in the current unsolved cell doesn't exist as a possibility
-    #   anywhere else in the current row, column, or block, then we can solve it
+    #######################################################
+    # check to see if 2 out of 3 row blocks have a value AND the 3rd block has 2 out of 3 values solved in that row
+    #######################################################
+    """
+    for example
+    1 0 0 | 0 0 0 | 0 0 0
+    0 0 0 | 0 2 3 | 0 0 0
+    0 0 0 | 0 0 0 | 1 0 0
+    the top left 1 and bottom right 1 mean the middle row of middle block must contain a 1
+    and since 2 out of 3 of those values are solved (0 2 3), we know the 3rd must be a 1
+    """
+    # easiest way to do this is simply to check if each location has a 'unique possibility'
     for i in range(81):
 
         earlyBreak = False
 
         #######################################################
-        # check rows for similar possibilities
+        # check rows for unique possibilities
         #######################################################
         if solvedList[i]:
             for j in range(len(sudokuList[i][1])):
@@ -237,7 +241,7 @@ def solveLocation2(sudokuList, solvedList):
                     break
 
         #######################################################
-        # check columns for similar possibilities
+        # check columns for unique possibilities
         #######################################################
         if solvedList[i]:  # check again, because it may have just been solved above
             for j in range(len(sudokuList[i][1])):
@@ -270,7 +274,7 @@ def solveLocation2(sudokuList, solvedList):
                     break
 
         #######################################################
-        # check 3x3 blocks for similar possibilities
+        # check 3x3 blocks for unique possibilities
         #######################################################
         if solvedList[i]:  # check again, because it may have just been solved above
             for j in range(len(sudokuList[i][1])):
@@ -621,32 +625,6 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                             except:
                                 #print('failed to remove possibility of ' + str(sudokuList[i][0]) + ' from indices ' + str([startIndex, startIndex + 9, startIndex + 18]))
                                 pass
-
-
-def removePossibilities4(sudokuList, solvedList, allBlocks):
-    # check each location
-    for i in range(81):
-
-        # if solvedList[i] is a known value (is 0), we can expand it
-        if not solvedList[i]:
-
-            #######################################################
-            # check to see if 2 out of 3 row blocks have a value AND the 3rd block has 2 out of 3 values solved in that row
-            #######################################################
-            """
-            for example
-            1 0 0 | 0 0 0 | 0 0 0
-            0 0 0 | 0 2 3 | 0 0 0
-            0 0 0 | 0 0 0 | 1 0 0
-            the top left 1 and bottom right 1 mean the middle row of middle block must contain a 1
-            and since 2 out of 3 of those values are solved (0 2 3), we know the 3rd must be a 1
-            """
-            pass
-
-            #######################################################
-            # check to see if 2 out of 3 column blocks have a value AND the 3rd block has 2 out of 3 values solved in that column
-            #######################################################
-
 
 
 def guessValues(sudokuList, solvedList, allBlocks):
