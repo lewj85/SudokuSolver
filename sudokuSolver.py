@@ -19,47 +19,6 @@ for reference:
 72 73 74 | 75 76 77 | 78 79 80
 """
 
-##################################################
-# CLASSES
-##################################################
-class PQ:
-    def __init__(self):
-        self.list = []
-        self.top = -1
-
-    # NOTE: push automatically sorts the value by length of its in index 1
-    def push(self, value):
-        i = 0
-        atEnd = True
-        if self.top != -1:
-            for i in range(self.length()):
-                # find the index i where the value should be inserted
-                if len(value[1]) < len(self.list[i][1]):
-                    atEnd = False
-                    break
-        # make sure you're not
-        if atEnd:
-            self.list.append(value)
-        else:
-            self.list.insert(i, value)
-        # don't forget to increment top
-        self.top += 1
-
-    def pop(self, index=0):
-        if self.top > -1:
-            self.top -= 1
-            return self.list.pop(index)
-
-    def peek(self, index=0):
-        return self.list[index]
-
-    def length(self):
-        return self.top + 1
-
-    def show(self):
-        for i in range(self.length()):
-            print(self.list[i])
-
 
 ##################################################
 # FUNCTIONS
@@ -104,12 +63,12 @@ def solvePuzzle(valueList, solvedList):
     # fill starting matrix/list with known values
     for i in range(81):
         if solvedList[i]:
-            sudokuList.append([0, []])
+            sudokuList.append([0, [], i])
             # create a list of values 1-9 for each location on the grid
             for j in range(1, 10):
                 sudokuList[i][1].append(j)
         else:
-            sudokuList.append([valueList[i], []])
+            sudokuList.append([valueList[i], [], i])
 
     # list of block indices
     block0 = [0, 9, 18, 1, 10, 19, 2, 11, 20]
@@ -148,8 +107,12 @@ def solvePuzzle(valueList, solvedList):
     ####################################################
     # PART 2 - guessing (aka "Magic")
     ####################################################
-
-    guessValues(sudokuList, solvedList, allBlocks)
+    # check to see if it's solved already
+    if 1 in solvedList:
+        # otherwise sort any unguessed nodes by the number of their possibilities
+        guessList = sorted(sudokuList, key=lambda x: len(x[1]))
+        # and guess the values
+        sudokuList, solvedList, guessList = guessValues(sudokuList, solvedList, guessList, allBlocks)
 
 
     finalList = ''
@@ -211,6 +174,7 @@ def solveLocation2(sudokuList, solvedList):
                 # go through each column of the current row
                 for r in range(9):
                     indexA = int(i / 9) * 9 + r
+
                     # print('i = ' + str(i))
                     # print('j = ' + str(j))
                     # print('indexA = ' + str(indexA))
@@ -627,34 +591,78 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                                 pass
 
 
-def guessValues(sudokuList, solvedList, allBlocks):
+def guessValues(sudokuList2, solvedList2, guessList2, allBlocks):
     ####################################################
     # PART 2 - guessing (aka "Magic")
     ####################################################
+    # base case
+    if 1 not in solvedList2:
+        return sudokuList2, solvedList2, guessList2
 
-    # add items to priority queue
-    pq = PQ()
+    # create copies for recursion so we can undo changes if need be
+    sudokuListCopy = sudokuList2[:]
+    solvedListCopy = solvedList2[:]
+    guessListCopy = guessList2[:]
+
+    # sort the remaining items by their remaining possibilities
+    guessListCopy.sort(key=lambda x: len(x[1]))
+
+    # remove all values from guessList that have no guesses remaining (ie. they are solved)
+    while not guessListCopy[0][1]:
+        guessListCopy.pop(0)
+    #print(guessList)
+
+    # explore the next node
+    node = guessListCopy.pop(0)
+    #print('node is ' + str(node))
+
+    # guess values
+    for i in range(len(node[1])):
+
+        sudokuListCopy[node[2]] = [node[1], [], node[2]]
+        solvedListCopy[node[2]] = 2
+
+        removePossibilities1(sudokuListCopy, solvedListCopy)
+        removePossibilities2(sudokuListCopy, solvedListCopy, allBlocks)
+
+        possibleSudoku, possibleSolved, possibleGuess = guessValues(sudokuListCopy, solvedListCopy, guessListCopy, allBlocks)
+        copiesAreOkay = testForDuplicates(possibleSudoku)
+        print(copiesAreOkay)
+        if copiesAreOkay:
+            return possibleSudoku, possibleSolved, possibleGuess
+
+    #if you make it past the for-loop, then none of the guesses were viable, so return original lists
+    return sudokuList2, solvedList2, guessList2
+
+
+def testForDuplicates(possibleSolution):
+
     for i in range(81):
-        if solvedList[i]:
-            pq.push(sudokuList[i])
-    # pq.show()
 
-    # 2nd while loop uses a pathing algorithm to look at possibilities
-    # NOTE: it uses a priority queue to expand the most likely nodes first
-    # NOTE: it marks guessed nodes as '2' in solvedList
-    while 1 in solvedList or 2 in solvedList:
+        # go through each index of current row
+        for r in range(9):
+            indexA = int(i / 9) * 9 + r
+            if possibleSolution[i][0] == possibleSolution[indexA][0]:
+                if i != indexA:  # skip current index
+                    return False
 
-        # remove all values from priority queue that have a length of 0 (ie. they are solved)
-        for i in range(pq.length()):
-            if len(pq.peek(0)[1]) == 0:  # NOTE: always peek(0), not peek(i) because we are popping
-                pq.pop()
-            else:
-                break  # stop early to save processing time
-        # pq.show()
+        # go through each index of current column
+        for c in range(9):
+            indexB = (i % 9) + (9 * c)
+            if possibleSolution[i][0] == possibleSolution[indexB][0]:
+                if i != indexB:  # skip current index
+                    return False
 
-        # TODO: magic
+        # go through each index of current 3x3 block
+        for u in range(3):
+            for v in range(3):
+                indexC = ((int(i / 3) * 3 + u) % 9) + (9 * v) + (int(i / 27) * 27)
+                if possibleSolution[i][0] == possibleSolution[indexC][0]:
+                    if i != indexC:  # skip current index
+                        return False
 
-        break
+    # otherwise no collisions so return True
+    return True
 
 
 def checkPuzzle(puzzle1, puzzle2):
@@ -669,7 +677,7 @@ def main():
 
     # TODO remove these samples, used for debugging
     values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
-    solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"
+    solved = "111111111111000011011110001011101010111101111010101110100011110110000111111111111"
 
     # regex
     parseHTML('blah')
