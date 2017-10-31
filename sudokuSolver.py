@@ -114,7 +114,7 @@ def solvePuzzle(valueList, solvedList):
         # and guess the values
         recursions = 0
         dynamicProgrammingList = []
-        #sudokuList, solvedList, guessList = guessValues(sudokuList, solvedList, guessList, allBlocks, recursions, dynamicProgrammingList)
+        sudokuList, solvedList, guessList = guessValues(sudokuList, solvedList, guessList, allBlocks, recursions, dynamicProgrammingList)
 
 
     finalList = ''
@@ -628,7 +628,7 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions, dyn
         removePossibilities1(sudokuListCopy, solvedListCopy)
         removePossibilities2(sudokuListCopy, solvedListCopy, allBlocks)
 
-        # TODO: add a better guessValues algorithm because even with dynamic programming, 20+ unknowns takes forever
+        # TODO: add a better guessValues algorithm because even with dynamic programming, 20+ unknowns takes forever - try MCTS
         # NOTE: DP doesn't seem to be triggering and all it does it take up space in memory, so removing it for now...
         #if sudokuListCopy not in dynamicProgammingList:
         #print(sudokuListCopy)
@@ -698,6 +698,7 @@ def main():
     #solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"  # 81/81
     solved = "010000100001010001010010001000000000111000000000000000100000100100000101010000001"  # 63/81
     #solved = "000000000000000000000000000000000000000000000000000000000000000000111111111111111"
+
 
     # regex
     parseHTML('blah')
