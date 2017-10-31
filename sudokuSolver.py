@@ -112,7 +112,9 @@ def solvePuzzle(valueList, solvedList):
         # otherwise sort any unguessed nodes by the number of their possibilities
         guessList = sorted(sudokuList, key=lambda x: len(x[1]))
         # and guess the values
-        sudokuList, solvedList, guessList = guessValues(sudokuList, solvedList, guessList, allBlocks)
+        recursions = 0
+        dynamicProgrammingList = []
+        #sudokuList, solvedList, guessList = guessValues(sudokuList, solvedList, guessList, allBlocks, recursions, dynamicProgrammingList)
 
 
     finalList = ''
@@ -591,12 +593,13 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                                 pass
 
 
-def guessValues(sudokuList2, solvedList2, guessList2, allBlocks):
+def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions, dynamicProgammingList):
     ####################################################
     # PART 2 - guessing (aka "Magic")
     ####################################################
     # base case
     if 1 not in solvedList2:
+        #print('base case')
         return sudokuList2, solvedList2, guessList2
 
     # create copies for recursion so we can undo changes if need be
@@ -619,19 +622,34 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks):
     # guess values
     for i in range(len(node[1])):
 
-        sudokuListCopy[node[2]] = [node[1], [], node[2]]
+        sudokuListCopy[node[2]] = [node[1][i], [], node[2]]
         solvedListCopy[node[2]] = 2
 
         removePossibilities1(sudokuListCopy, solvedListCopy)
         removePossibilities2(sudokuListCopy, solvedListCopy, allBlocks)
 
-        possibleSudoku, possibleSolved, possibleGuess = guessValues(sudokuListCopy, solvedListCopy, guessListCopy, allBlocks)
+        # TODO: add a better guessValues algorithm because even with dynamic programming, 20+ unknowns takes forever
+        # NOTE: DP doesn't seem to be triggering and all it does it take up space in memory, so removing it for now...
+        #if sudokuListCopy not in dynamicProgammingList:
+        #print(sudokuListCopy)
+        #temp = sudokuListCopy[:]
+        #dynamicProgammingList.append(temp)
+        #del temp
+        #print(len(dynamicProgammingList))
+        recursions += 1
+        possibleSudoku, possibleSolved, possibleGuess = guessValues(sudokuListCopy, solvedListCopy, guessListCopy, allBlocks, recursions, dynamicProgammingList)
+        #if recursions < 33:
+        print('recursion depth: ' + recursions*'*')
         copiesAreOkay = testForDuplicates(possibleSudoku)
-        print(copiesAreOkay)
+        #print(copiesAreOkay)
         if copiesAreOkay:
+            #print('found solution')
             return possibleSudoku, possibleSolved, possibleGuess
+        #else:
+        #    print('yay for DP')
 
-    #if you make it past the for-loop, then none of the guesses were viable, so return original lists
+    # either dynamic programming prevented the check or none of the guesses were viable, so return original lists
+    #print('DP or exhausted')
     return sudokuList2, solvedList2, guessList2
 
 
@@ -677,7 +695,9 @@ def main():
 
     # TODO remove these samples, used for debugging
     values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
-    solved = "111111111111000011011110001011101010111101111010101110100011110110000111111111111"
+    #solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"  # 81/81
+    solved = "010000100001010001010010001000000000111000000000000000100000100100000101010000001"  # 63/81
+    #solved = "000000000000000000000000000000000000000000000000000000000000000000111111111111111"
 
     # regex
     parseHTML('blah')
