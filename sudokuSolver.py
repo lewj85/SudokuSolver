@@ -1,8 +1,24 @@
 """This script solves Sudoku puzzles by parsing their initial html starting state."""
 
+import time
+
 # html values examples
+# EASY
 # <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="659821374843975216271463985482519637937642158516387492365298741728134569194756823">
 # <INPUT ID="editmask" TYPE=hidden VALUE="111111110111000011011110001011101010111101111010101110100011110110000111011111111">
+
+# MEDIUM
+# <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="945132678623478915718965423279813564384256791156749832832694157561387249497521386">
+# <INPUT ID="editmask" TYPE=hidden VALUE="110010010010101101011100000001111011111111111110110100000101110111101110011000011">
+
+# HARD
+# <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="953861427128794563467523891645317289231958746789246315316485972594172638872639154">
+# <INPUT ID="editmask" TYPE=hidden VALUE="011010111111110110001101110011010101111101011101110110011101100111011101011010110">
+
+# EVIL
+# <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="519672348374918265286435791863729154952841673741356982498263517625187439137594826">
+# <INPUT ID="editmask" TYPE=hidden VALUE="101110111010011111100111011111101110110000011011101111110111001111110010111011101">
+
 
 """
 for reference:
@@ -625,11 +641,9 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions, dyn
         sudokuListCopy[node[2]] = [node[1][i], [], node[2]]
         solvedListCopy[node[2]] = 2
 
-        removePossibilities1(sudokuListCopy, solvedListCopy)
-        removePossibilities2(sudokuListCopy, solvedListCopy, allBlocks)
-
         # TODO: add a better guessValues algorithm because even with dynamic programming, 20+ unknowns takes forever - try MCTS
         # NOTE: DP doesn't seem to be triggering and all it does it take up space in memory, so removing it for now...
+        # TODO: for DP, make sure you re-order sudokuListCopy to be sorted by index - note: sorting is important because [1,2,3] isn't the same as [1,3,2]
         #if sudokuListCopy not in dynamicProgammingList:
         #print(sudokuListCopy)
         #temp = sudokuListCopy[:]
@@ -693,12 +707,19 @@ def checkPuzzle(puzzle1, puzzle2):
 
 def main():
 
+    start = time.time()
+
     # TODO remove these samples, used for debugging
     values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
-    #solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"  # 81/81
-    solved = "010000100001010001010010001000000000111000000000000000100000100100000101010000001"  # 63/81
-    #solved = "000000000000000000000000000000000000000000000000000000000000000000111111111111111"
-
+    #solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"  # 81/81 without guessing
+    solved = "010000100001010001010010001000000000111000000000000000100000100100000101010000001"  # 63/81 without guessing
+    #solved = "000000000000000000000000000000000000000000000000000000000000000111111111111111111"  # this finds an alternate solution!!! bottom left 1 7 swap with bottom middle 1 7
+    #values = "945132678623478915718965423279813564384256791156749832832694157561387249497521386"
+    #solved = "110010010010101101011100000001111011111111111110110100000101110111101110011000011"  # 58/81 without guessing
+    #values = "953861427128794563467523891645317289231958746789246315316485972594172638872639154"
+    #solved = "011010111111110110001101110011010101111101011101110110011101100111011101011010110"  # 45/81 without guessing
+    #values = "519672348374918265286435791863729154952841673741356982498263517625187439137594826"
+    #solved = "101110111010011111100111011111101110110000011011101111110111001111110010111011101"  # 30/81 without guessing
 
     # regex
     parseHTML('blah')
@@ -713,7 +734,10 @@ def main():
     printPuzzle(result)
 
     # double check all values are correct
-    print('Values solved: ' + str(checkPuzzle(result, values)) + '/81.')
+    print('Values solved: ' + str(checkPuzzle(result, values)) + '/81')
+
+    # print time it took
+    print("Time: " + str(int(time.time() - start)) + " seconds")
 
 
 if __name__ == "__main__":
