@@ -97,8 +97,6 @@ def solvePuzzle(valueList, solvedList):
     block7 = [x + 27*2 for x in block1]
     block8 = [x + 27*2 for x in block2]
     allBlocks = [block0, block1, block2, block3, block4, block5, block6, block7, block8]
-    #for i in allBlocks:
-    #    print(i)
 
 
     ####################################################
@@ -157,11 +155,8 @@ def solveLocation1(sudokuList, solvedList):
         if len(sudokuList[i][1]) == 1:
             print('solving index ' + str(i) + ' - only 1 possibility left')
             solvedList[i] = 0
-            # print(sudokuList[i])
             sudokuList[i][0] = sudokuList[i][1][0]
             sudokuList[i][1].pop()
-            # print(sudokuList[i])
-            # print('found index '+str(i)+': '+str(sudokuList[i][0]))
 
 
 def solveLocation2(sudokuList, solvedList):
@@ -191,12 +186,6 @@ def solveLocation2(sudokuList, solvedList):
                 # go through each column of the current row
                 for r in range(9):
                     indexA = int(i / 9) * 9 + r
-
-                    # print('i = ' + str(i))
-                    # print('j = ' + str(j))
-                    # print('indexA = ' + str(indexA))
-                    # print('sudokuList[i] = ' + str(sudokuList[i]))
-                    # print('sudokuList[indexA] = ' + str(sudokuList[indexA]))
 
                     # this shouldn't happen, but adding it in to be safe - make sure the value isn't already solved
                     if sudokuList[i][1][j] == sudokuList[indexA][0]:
@@ -311,7 +300,6 @@ def removePossibilities1(sudokuList, solvedList):
                 indexA = int(i/9)*9 + r
                 # pop that value from the list
                 if sudokuList[i][0] in sudokuList[indexA][1]:
-                    #print('removing possibility ' + str(sudokuList[i][0]) + ' from ' + str(sudokuList[indexA]) + ' at index ' + str(indexA))
                     sudokuList[indexA][1].pop(sudokuList[indexA][1].index(sudokuList[i][0]))
 
             #######################################################
@@ -322,7 +310,6 @@ def removePossibilities1(sudokuList, solvedList):
                 indexB = (i % 9) + (9 * s)
                 # pop that value from the list
                 if sudokuList[i][0] in sudokuList[indexB][1]:
-                    #print('removing possibility ' + str(sudokuList[i][0]) + ' from ' + str(sudokuList[indexB]) + ' at index ' + str(indexB))
                     sudokuList[indexB][1].pop(sudokuList[indexB][1].index(sudokuList[i][0]))
 
             #######################################################
@@ -333,7 +320,6 @@ def removePossibilities1(sudokuList, solvedList):
                     # go through each index of current 3x3 block
                     indexC = ((int(i / 3) * 3 + u) % 9) + (9 * v) + (int(i / 27) * 27)
                     if sudokuList[i][0] in sudokuList[indexC][1]:
-                        #print('removing possibility ' + str(sudokuList[i][0]) + ' from ' + str(sudokuList[indexC]) + ' at index ' + str(indexC))
                         sudokuList[indexC][1].pop(sudokuList[indexC][1].index(sudokuList[i][0]))
 
 
@@ -362,19 +348,15 @@ def removePossibilities2(sudokuList, solvedList, allBlocks):
                     block = aa
                     break
                 blockNum += 1
-            #print(str(i)+' is in block '+str(blockNum)+' with values '+str(block))
 
             # find the 3 blocks in the row
             firstBlock = int(blockNum / 3) * 3
-            # print(firstBlock)
             rowBlocks = [firstBlock, firstBlock + 1, firstBlock + 2]
             location = blockNum % 3
             rowBlocks.pop(location)
-            #print('other blocks in row are '+str(rowBlocks))
 
             # isolate the row i is on
             row = int((i % 27) / 9)
-            #print(str(i)+' is in row '+str(row))
 
             # check each adjacent block in the row
             for bb in rowBlocks:
@@ -384,28 +366,20 @@ def removePossibilities2(sudokuList, solvedList, allBlocks):
                 blockVals = []
                 for dd in allBlocks[bb]:
                     blockVals.append(sudokuList[dd][0])
-                #print(blockVals)
 
                 # check each value in that block
                 for cc in allBlocks[bb]:
                     # if not on the same row, add up solved values
-                    # print('is row '+str(int((int(cc/9)*9 % 27)/9))+' != '+str(row))
                     if int((cc % 27) / 9) != row:
-                        # print('appending '+str(cc)+' to theSix')
                         theSix.append(cc)
-                        # print(theSix)
                         # if solvedList[cc] is solved (has a 0)
                         if not solvedList[cc]:
                             counter += 1
-                    #print(counter)
                     # if the total count is 5, we can solve the 6th
                     if counter == 5:
-                        #print('theSix for ' + str(i) + ' are ' + str(theSix))
                         for x in theSix:
                             # find the index that's unsolved and make sure the value doesn't already exist in the block
                             if solvedList[x]:
-                                #print(str(x)+' needs to be solved')
-                                #print('checking to see if '+str(sudokuList[i][0])+' is in '+str(blockVals))
                                 if sudokuList[i][0] not in blockVals:
                                     # replace the unknown with sudokuList[i] and update solvedList
                                     print('solving index ' + str(x) + ' - 5 out of 6 knowns in adjacent row blocks')
@@ -423,13 +397,11 @@ def removePossibilities2(sudokuList, solvedList, allBlocks):
             colBlocks = [firstBlock, firstBlock + 3, firstBlock + 6]
             location = int(blockNum / 3)
             colBlocks.pop(location)
-            # print('other blocks in row are '+str(rowBlocks))
 
             # store the solved numbers in the current block
             blockVals = []
             for aa in block:
                 blockVals.append(sudokuList[aa])
-            #print(blockVals)
 
             # isolate the column i is on
             col = i % 3
@@ -442,20 +414,15 @@ def removePossibilities2(sudokuList, solvedList, allBlocks):
                 blockVals = []
                 for dd in block:
                     blockVals.append(sudokuList[dd][0])
-                # print(blockVals)
 
                 # check each value in that block
                 for cc in allBlocks[bb]:
                     # if not on the same row, add up solved values
-                    # print('is row '+str(int((int(cc/9)*9 % 27)/9))+' != '+str(row))
                     if cc % 3 != col:
-                        # print('appending '+str(cc)+' to theSix')
                         theSix.append(cc)
-                        # print(theSix)
                         # if solvedList[cc] is solved (has a 0)
                         if not solvedList[cc]:
                             counter += 1
-                    # print(counter)
                     # if the total count is 5, we can solve the 6th
                     if counter == 5:
                         #print('theSix for ' + str(i) + ' are ' + str(theSix))
@@ -493,7 +460,6 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                 if i in block:
                     break
                 blockNum += 1
-            # print(str(i)+' is in block '+str(blockNum)+' with values '+str(block))
 
             # find the 3 blocks in the row
             firstBlock = int(blockNum / 3) * 3
@@ -501,7 +467,6 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
             rowBlocks = [firstBlock, firstBlock + 1, firstBlock + 2]  # blocks [0,1,2] or [3,4,5] or [6,7,8]
             location = blockNum % 3  # get index of current block to pop out of rowBlocks below
             rowBlocks.pop(location)
-            # print('other blocks in row are '+str(rowBlocks))
 
             # isolate the row i is on
             row = int((i % 27) / 9)
@@ -517,7 +482,6 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                     diffRow = int((threeIndex % 27) / 9)
                     if diffRow != row:
                         theThree[diffRow].append(threeIndex)
-                #print('i is ' + str(i) + ' : theThree is ' + str(theThree))
 
                 for eachThree in range(len(theThree)):
                     counter = 0
@@ -527,9 +491,7 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                             # bugfix: make sure sudokuList[i][0] isn't in theThree indices
                             if not solvedList[threeIndex] and sudokuList[i][0] != sudokuList[threeIndex][0]:
                                 counter += 1
-                    # print(counter)
-                    # if the total count is 3, we can eliminate index i from last row of last rowBlock
-                    #print(rowBlocks)
+
                     if counter == 3:
                         temp = rowBlocks[:]  # NOTE: need [:] to make a copy, otherwise python will just make another reference for the same object...
                         temp.remove(rowBlockNum)
@@ -540,12 +502,7 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                         temp.remove(int((threeIndex % 27) / 9))
                         lastRow = temp.pop(0)
                         startIndex = allBlocks[lastBlock][lastRow]  # takes index 0,1, or 2 because the lastBlock row order is [0,1,2...]
-                        # print('i is ' + str(i) + ' with value '+str(sudokuList[i]))
-                        # print('theThree is ' + str(theThree))
-                        # print('threeIndex is '+str(threeIndex))
-                        # print('lastRow is '+str(lastRow))
-                        # print('allBlocks[lastBlock] is '+str(allBlocks[lastBlock]))
-                        # print('startIndex is ' + str(startIndex))
+
                         for k in [0,1,2]:
                             #print('sudokuList[startIndex+k] is ' + str(sudokuList[startIndex + k]))
                             try:
@@ -609,19 +566,19 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
 
 
 def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions = 0):
-    ####################################################
-    # PART 2 - guessing (aka "Magic")
-    ####################################################
-    # base case
+
+    # enhance!
+    recursions += 1
+    print('recursion depth: ' + recursions * '*')
+
+    # base case - stops when all values are solved/guessed without conflicts
     if 1 not in solvedList2:
-        #print('base case')
         return sudokuList2, solvedList2, guessList2
 
     # create copies for recursion so we can undo changes if need be
     sudokuListCopy = sudokuList2[:]
     solvedListCopy = solvedList2[:]
     guessListCopy = guessList2[:]
-    possibleSudoku = []
 
     # sort the remaining items by their remaining possibilities
     guessListCopy.sort(key=lambda x: len(x[1]))
@@ -629,11 +586,9 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions = 0)
     # remove all values from guessList that have no guesses remaining (ie. they are solved)
     while not guessListCopy[0][1]:
         guessListCopy.pop(0)
-    #print(guessListCopy)
 
     # explore the next node
     node = guessListCopy.pop(0)
-    #print('node is ' + str(node))
 
     # guess values
     for i in range(len(node[1])):
@@ -644,29 +599,27 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions = 0)
 
         # test for conflicts
         copiesAreOkay = testForDuplicates(sudokuListCopy)
-        #print(copiesAreOkay)
 
         # if no conflicts, continue with recursion to next guess
         if copiesAreOkay:
 
-            recursions += 1
-            print('recursion depth: ' + recursions * '*')
-
+            # recursion
             possibleSudoku, possibleSolved, possibleGuess = guessValues(sudokuListCopy, solvedListCopy, guessListCopy,
                                                                         allBlocks, recursions)
 
-        else:  # otherwise, if there was a conflict
+            # if solution is found, return solution
+            if 1 not in possibleSolved:
+                return possibleSudoku, possibleSolved, possibleGuess
+
+        # otherwise, if there was a conflict
+        else:
 
             # undo the change!
             sudokuListCopy[node[2]] = node
-            solvedListCopy[node[2]] = 0
+            solvedListCopy[node[2]] = 1
 
-    # if we created new values, send them back
-    if possibleSudoku:
-        return possibleSudoku, possibleSolved, possibleGuess
-    # if none of the guesses were viable, return original lists
-    else:
-        return sudokuList2, solvedList2, guessList2
+    # if all values had conflicts, return unchanged lists
+    return sudokuList2, solvedList2, guessList2
 
 
 def testForDuplicates(possibleSolution):
@@ -679,7 +632,7 @@ def testForDuplicates(possibleSolution):
             if possibleSolution[i][0] == possibleSolution[indexA][0]:
                 if possibleSolution[i][0] != 0:  # make sure it's not 0 == 0 for unknown cells
                     if i != indexA:  # skip current index
-                        print('found conflict at indices: ' + str(i) + ', ' + str(indexA))
+                        #print('found conflict at indices: ' + str(i) + ', ' + str(indexA))
                         return False
 
         # go through each index of current column
@@ -688,7 +641,7 @@ def testForDuplicates(possibleSolution):
             if possibleSolution[i][0] == possibleSolution[indexB][0]:
                 if possibleSolution[i][0] != 0:  # make sure it's not 0 == 0 for unknown cells
                     if i != indexB:  # skip current index
-                        print('found conflict at indices: ' + str(i) + ', ' + str(indexB))
+                        #print('found conflict at indices: ' + str(i) + ', ' + str(indexB))
                         return False
 
         # go through each index of current 3x3 block
@@ -698,7 +651,7 @@ def testForDuplicates(possibleSolution):
                 if possibleSolution[i][0] == possibleSolution[indexC][0]:
                     if possibleSolution[i][0] != 0:  # make sure it's not 0 == 0 for unknown cells
                         if i != indexC:  # skip current index
-                            print('found conflict at indices: ' + str(i) + ', ' + str(indexC))
+                            #print('found conflict at indices: ' + str(i) + ', ' + str(indexC))
                             return False
 
     # otherwise no collisions so return True
@@ -706,10 +659,11 @@ def testForDuplicates(possibleSolution):
 
 
 def checkPuzzle(puzzle1, puzzle2):
+
     counter = 0
     for i in range(81):
         counter += (puzzle1[i]==puzzle2[i])
-    #return (counter == 81)
+
     return counter
 
 
@@ -718,16 +672,17 @@ def main():
     start = time.time()
 
     # TODO remove these samples, used for debugging
-    values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
+    #values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
     #solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"  # 81/81 without guessing
-    solved = "010000100001010001010010001000000000111000000000000000100000100100000101010000001"  # 63/81 without guessing
+    #solved = "010000100001010001010010001000000000111000000000000000100000100100000101010000001"  # 63/81 without guessing
     #solved = "000000000000000000000000000000000000000000000000000000000000000111111111111111111"  # this finds an alternate solution!!! bottom left 1 7 swap with bottom middle 1 7
     #values = "945132678623478915718965423279813564384256791156749832832694157561387249497521386"
     #solved = "110010010010101101011100000001111011111111111110110100000101110111101110011000011"  # 58/81 without guessing
     #values = "953861427128794563467523891645317289231958746789246315316485972594172638872639154"
-    #solved = "011010111111110110001101110011010101111101011101110110011101100111011101011010110"  # 45/81 without guessing
-    #values = "519672348374918265286435791863729154952841673741356982498263517625187439137594826"
+    solved = "011010111111110110001101110011010101111101011101110110011101100111011101011010110"  # 45/81 without guessing
+    values = "519672348374918265286435791863729154952841673741356982498263517625187439137594826"
     #solved = "101110111010011111100111011111101110110000011011101111110111001111110010111011101"  # 30/81 without guessing
+    #solved = "111111111111111111111111111111111111111111111111111111111111111111111111111111111"  # 0/81 for fun
 
     # regex
     parseHTML('blah')
@@ -742,7 +697,13 @@ def main():
     printPuzzle(result)
 
     # double check all values are correct
-    print('Values solved: ' + str(checkPuzzle(result, values)) + '/81')
+    knowns = checkPuzzle(result, values)
+    if knowns == 81:
+        print('Solution found. Matches: ' + str(knowns) + '/81')
+    elif '0' not in result:
+        print('Alternate solution found. Matches: ' + str(knowns) + '/81')
+    else:
+        print('No solution possible.')
 
     # print time it took
     print("Time: " + str(int(time.time() - start)) + " seconds")
