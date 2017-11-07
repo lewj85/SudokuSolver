@@ -127,10 +127,9 @@ def solvePuzzle(valueList, solvedList):
     if 1 in solvedList:
         # otherwise sort any unguessed nodes by the number of their possibilities
         guessList = sorted(sudokuList, key=lambda x: len(x[1]))
+
         # and guess the values
-        recursions = 0
-        dynamicProgrammingList = []
-        sudokuList, solvedList, guessList = guessValues(sudokuList, solvedList, guessList, allBlocks, recursions, dynamicProgrammingList)
+        sudokuList, solvedList, guessList = guessValues(sudokuList, solvedList, guessList, allBlocks)
 
 
     finalList = ''
@@ -609,7 +608,7 @@ def removePossibilities3(sudokuList, solvedList, allBlocks):
                                 pass
 
 
-def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions, dynamicProgammingList):
+def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions = 0):
     ####################################################
     # PART 2 - guessing (aka "Magic")
     ####################################################
@@ -622,6 +621,7 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions, dyn
     sudokuListCopy = sudokuList2[:]
     solvedListCopy = solvedList2[:]
     guessListCopy = guessList2[:]
+    possibleSudoku = []
 
     # sort the remaining items by their remaining possibilities
     guessListCopy.sort(key=lambda x: len(x[1]))
@@ -629,7 +629,7 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions, dyn
     # remove all values from guessList that have no guesses remaining (ie. they are solved)
     while not guessListCopy[0][1]:
         guessListCopy.pop(0)
-    #print(guessList)
+    #print(guessListCopy)
 
     # explore the next node
     node = guessListCopy.pop(0)
@@ -638,33 +638,35 @@ def guessValues(sudokuList2, solvedList2, guessList2, allBlocks, recursions, dyn
     # guess values
     for i in range(len(node[1])):
 
+        # make the guess
         sudokuListCopy[node[2]] = [node[1][i], [], node[2]]
         solvedListCopy[node[2]] = 2
 
-        # TODO: add a better guessValues algorithm because even with dynamic programming, 20+ unknowns takes forever - try MCTS
-        # NOTE: DP doesn't seem to be triggering and all it does it take up space in memory, so removing it for now...
-        # TODO: for DP, make sure you re-order sudokuListCopy to be sorted by index - note: sorting is important because [1,2,3] isn't the same as [1,3,2]
-        #if sudokuListCopy not in dynamicProgammingList:
-        #print(sudokuListCopy)
-        #temp = sudokuListCopy[:]
-        #dynamicProgammingList.append(temp)
-        #del temp
-        #print(len(dynamicProgammingList))
-        recursions += 1
-        possibleSudoku, possibleSolved, possibleGuess = guessValues(sudokuListCopy, solvedListCopy, guessListCopy, allBlocks, recursions, dynamicProgammingList)
-        #if recursions < 33:
-        print('recursion depth: ' + recursions*'*')
-        copiesAreOkay = testForDuplicates(possibleSudoku)
+        # test for conflicts
+        copiesAreOkay = testForDuplicates(sudokuListCopy)
         #print(copiesAreOkay)
-        if copiesAreOkay:
-            #print('found solution')
-            return possibleSudoku, possibleSolved, possibleGuess
-        #else:
-        #    print('yay for DP')
 
-    # either dynamic programming prevented the check or none of the guesses were viable, so return original lists
-    #print('DP or exhausted')
-    return sudokuList2, solvedList2, guessList2
+        # if no conflicts, continue with recursion to next guess
+        if copiesAreOkay:
+
+            recursions += 1
+            print('recursion depth: ' + recursions * '*')
+
+            possibleSudoku, possibleSolved, possibleGuess = guessValues(sudokuListCopy, solvedListCopy, guessListCopy,
+                                                                        allBlocks, recursions)
+
+        else:  # otherwise, if there was a conflict
+
+            # undo the change!
+            sudokuListCopy[node[2]] = node
+            solvedListCopy[node[2]] = 0
+
+    # if we created new values, send them back
+    if possibleSudoku:
+        return possibleSudoku, possibleSolved, possibleGuess
+    # if none of the guesses were viable, return original lists
+    else:
+        return sudokuList2, solvedList2, guessList2
 
 
 def testForDuplicates(possibleSolution):
@@ -675,23 +677,29 @@ def testForDuplicates(possibleSolution):
         for r in range(9):
             indexA = int(i / 9) * 9 + r
             if possibleSolution[i][0] == possibleSolution[indexA][0]:
-                if i != indexA:  # skip current index
-                    return False
+                if possibleSolution[i][0] != 0:  # make sure it's not 0 == 0 for unknown cells
+                    if i != indexA:  # skip current index
+                        print('found conflict at indices: ' + str(i) + ', ' + str(indexA))
+                        return False
 
         # go through each index of current column
         for c in range(9):
             indexB = (i % 9) + (9 * c)
             if possibleSolution[i][0] == possibleSolution[indexB][0]:
-                if i != indexB:  # skip current index
-                    return False
+                if possibleSolution[i][0] != 0:  # make sure it's not 0 == 0 for unknown cells
+                    if i != indexB:  # skip current index
+                        print('found conflict at indices: ' + str(i) + ', ' + str(indexB))
+                        return False
 
         # go through each index of current 3x3 block
         for u in range(3):
             for v in range(3):
                 indexC = ((int(i / 3) * 3 + u) % 9) + (9 * v) + (int(i / 27) * 27)
                 if possibleSolution[i][0] == possibleSolution[indexC][0]:
-                    if i != indexC:  # skip current index
-                        return False
+                    if possibleSolution[i][0] != 0:  # make sure it's not 0 == 0 for unknown cells
+                        if i != indexC:  # skip current index
+                            print('found conflict at indices: ' + str(i) + ', ' + str(indexC))
+                            return False
 
     # otherwise no collisions so return True
     return True
