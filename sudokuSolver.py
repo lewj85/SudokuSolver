@@ -1,23 +1,10 @@
+#!/usr/bin/env python
+
 """This script solves Sudoku puzzles by parsing their initial html starting state."""
 
 import time
-
-# html values examples
-# EASY
-# <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="659821374843975216271463985482519637937642158516387492365298741728134569194756823">
-# <INPUT ID="editmask" TYPE=hidden VALUE="111111110111000011011110001011101010111101111010101110100011110110000111011111111">
-
-# MEDIUM
-# <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="945132678623478915718965423279813564384256791156749832832694157561387249497521386">
-# <INPUT ID="editmask" TYPE=hidden VALUE="110010010010101101011100000001111011111111111110110100000101110111101110011000011">
-
-# HARD
-# <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="953861427128794563467523891645317289231958746789246315316485972594172638872639154">
-# <INPUT ID="editmask" TYPE=hidden VALUE="011010111111110110001101110011010101111101011101110110011101100111011101011010110">
-
-# EVIL
-# <INPUT NAME=cheat ID="cheat" TYPE=hidden VALUE="519672348374918265286435791863729154952841673741356982498263517625187439137594826">
-# <INPUT ID="editmask" TYPE=hidden VALUE="101110111010011111100111011111101110110000011011101111110111001111110010111011101">
+from urllib.request import urlopen
+import re
 
 
 """
@@ -39,10 +26,16 @@ for reference:
 ##################################################
 # FUNCTIONS
 ##################################################
-def parseHTML(htmlStuff):
-    # regex is fun
-    pass
+def parsePuzzle(site):
+    response = urlopen(site)
+    page_source = response.read()
 
+    # https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags/1732454
+    # find all groups of 81 digits in a row
+    the3 = re.findall(r'\d{81}', str(page_source))
+    # the3[0] = cheat, the3[1] = answer, the3[2] = clues
+
+    return the3[1], the3[2]
 
 def printPuzzle(valueList, solvedList='0'*81):
     for i in range(9):
@@ -662,33 +655,30 @@ def checkPuzzle(puzzle1, puzzle2):
 
     counter = 0
     for i in range(81):
-        counter += (puzzle1[i]==puzzle2[i])
+        counter += (puzzle1[i] == puzzle2[i])
 
     return counter
 
 
 def main():
 
-    start = time.time()
+    # difficulty = '0'
+    # difficulties = ['1', '2', '3', '4']
+    # while difficulty not in difficulties:
+    #     difficulty = input('Enter difficulty from 1 (easiest) to 4 (hardest): ')
+    difficulty = '4'
 
-    # TODO remove these samples, used for debugging
-    #values = "659821374843975216271463985482519637937642158516387492365298741728134569194756823"
-    #solved = "111111110111000011011110001011101010111101111010101110100011110110000111011111111"  # 81/81 without guessing
-    #solved = "010000100001010001010010001000000000111000000000000000100000100100000101010000001"  # 63/81 without guessing
-    #solved = "000000000000000000000000000000000000000000000000000000000000000111111111111111111"  # this finds an alternate solution!!! bottom left 1 7 swap with bottom middle 1 7
-    #values = "945132678623478915718965423279813564384256791156749832832694157561387249497521386"
-    #solved = "110010010010101101011100000001111011111111111110110100000101110111101110011000011"  # 58/81 without guessing
-    #values = "953861427128794563467523891645317289231958746789246315316485972594172638872639154"
-    solved = "011010111111110110001101110011010101111101011101110110011101100111011101011010110"  # 45/81 without guessing
-    values = "519672348374918265286435791863729154952841673741356982498263517625187439137594826"
-    #solved = "101110111010011111100111011111101110110000011011101111110111001111110010111011101"  # 30/81 without guessing
-    #solved = "111111111111111111111111111111111111111111111111111111111111111111111111111111111"  # 0/81 for fun
+    # site
+    site = "http://view.websudoku.com/?level="+difficulty
 
     # regex
-    parseHTML('blah')
+    values, solved = parsePuzzle(site)
 
     # first print the puzzle unsolved
     printPuzzle(values, solved)
+
+    # start timer
+    start = time.time()
 
     # solve the puzzle
     result = solvePuzzle(values, solved)
